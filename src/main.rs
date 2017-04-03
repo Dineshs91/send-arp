@@ -1,11 +1,15 @@
 extern crate pnet;
 
-use std::time::Duration;
+use std::io;
 use std::thread;
+use std::time::Duration;
+use std::net::Ipv4Addr;
+use std::net::AddrParseError;
 
 use pnet::datalink::{self, NetworkInterface};
 use pnet::datalink::Channel;
 use pnet::packet::ethernet::EthernetPacket;
+use pnet::util::{MacAddr, ParseMacAddrErr};
 
 
 fn send_arp_request_packet() {
@@ -79,11 +83,6 @@ fn send_arp_reply_packet() {
     ///     target_proto_addr: [0xc0, 0xa8, 0x00, 0x65], // // Ipv4(192.168.0.101)
     ///     payload: [],
     /// }
-    
-    // Arp spoofing. 
-    //   Send an arp request with the source mac as the target mac
-    //   the target ip with a fake ip addr.
-    // F8-CF-C5-80-C9-94 (mac) 192.168.0.191 (0xC0A800BF)
 
     let buffer: &[u8] = &[0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x28, 0xef, 0xf9, 0x5f, 0x8e, 0x2b, 0x08, 0x06,
                          0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x02, 0x28, 0xef, 0xf9, 0x5f, 0x8e, 0x2b, 0xc0, 0xa8, 0x00, 0xbf, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc0, 0xa8, 0x00, 0x01];
@@ -97,8 +96,20 @@ fn send_gratitious_arp_request() {
 
 
 fn main() {
-    loop {
-        send_arp_reply_packet();
-        thread::sleep(Duration::new(2, 0));
-    }
+    let mut mac_addr = String::new();
+    io::stdin().read_line(&mut mac_addr).expect("Failed to read input");
+
+    let mac_addr: Result<MacAddr, ParseMacAddrErr> = mac_addr.trim().parse();
+    println!("Mac address is {:?}", mac_addr);
+
+    let mut ip_addr = String::new();
+    io::stdin().read_line(&mut ip_addr).expect("Failed to read input");
+
+    let ip_addr: Result<Ipv4Addr, AddrParseError> = ip_addr.trim().parse();
+    println!("Ip address is {:?}", ip_addr);
+
+    // // loop {
+    // //     //send_arp_reply_packet();
+    // //     thread::sleep(Duration::new(2, 0));
+    // // }
 }
