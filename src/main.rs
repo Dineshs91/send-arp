@@ -54,12 +54,12 @@ fn send_arp_reply_packet(gateway: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4
     ///     payload: [],
     /// }
 
-    let mut buffer: &mut [u8] = &mut [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    let mut ethernet_buffer: &mut [u8] = &mut [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
-    let mut ethernet_packet = MutableEthernetPacket::new(&mut buffer).unwrap();
+    let mut ethernet_packet = MutableEthernetPacket::new(&mut ethernet_buffer).unwrap();
     ethernet_packet.set_destination(target_mac);
     ethernet_packet.set_source(source_mac);
     ethernet_packet.set_ethertype(EtherTypes::Arp);
@@ -92,10 +92,9 @@ fn main() {
 
     loop {        
         send_arp_reply_packet(config.source_ip, config.source_mac, config.target_ip, config.target_mac);
-        thread::sleep(Duration::new(5, 0));
 
         packet_count += 1;
-
         println!("Sent {} ARP reply packets.", packet_count);
+        thread::sleep(Duration::new(5, 0));
     }
 }
