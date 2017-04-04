@@ -15,19 +15,13 @@ use pnet::packet::arp::MutableArpPacket;
 use pnet::util::MacAddr;
 use pnet::packet::ethernet::EtherTypes;
 use pnet::packet::MutablePacket;
-use pnet::packet::arp::{ArpHardwareTypes, ArpOperations};
+use pnet::packet::arp::{ArpHardwareTypes, ArpOperation};
 
 use config::Config;
 use cli::cli_main;
 
 
-fn send_arp_reply_packet(source_ip: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4Addr, target_mac: MacAddr) {
-    let interfaces = datalink::interfaces();
-
-    // Get en1 interface in osx.
-    let interfaces_name_match = |iface: &NetworkInterface| iface.name == "en1";
-    let interface = interfaces.into_iter().filter(interfaces_name_match).next().unwrap();
-
+fn send_arp_packet(interface: NetworkInterface, source_ip: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4Addr, target_mac: MacAddr, arp_operation: ArpOperation) {
     let(mut tx, _) = match datalink::channel(&interface, Default::default()) {
         Ok(Channel::Ethernet(tx, rx)) => (tx, rx),
         Ok(_) => panic!("Unknown channel type"),
@@ -74,7 +68,7 @@ fn send_arp_reply_packet(source_ip: Ipv4Addr, source_mac: MacAddr, target_ip: Ip
     arp_packet.set_protocol_type(EtherTypes::Ipv4);
     arp_packet.set_hw_addr_len(6);
     arp_packet.set_proto_addr_len(4);
-    arp_packet.set_operation(ArpOperations::Reply);
+    arp_packet.set_operation(arp_operation);
     arp_packet.set_sender_hw_addr(source_mac);
     arp_packet.set_sender_proto_addr(source_ip);
     arp_packet.set_target_hw_addr(target_mac);
@@ -90,11 +84,17 @@ fn main() {
     let config: Config = cli_main();
     let mut packet_count: i32 = 0;
 
-    loop {        
-        send_arp_reply_packet(config.source_ip, config.source_mac, config.target_ip, config.target_mac);
+    loop {
+        let interfaces = datalink::interfaces();
+
+        // Get en1 interface in osx.
+        let interfaces_name_match = |iface: &NetworkInterface| iface.name == config.interface;
+        let interface = interfaces.into_iter().filter(interfaces_name_match).next().unwrap();
+       
+       send_arp_packet(interface, config.source_ip, config.source_mac, config.target_ip, config.target_mac, config.arp_operation);
 
         packet_count += 1;
-        println!("Sent {} ARP reply packets.", packet_count);
+        println!("Sent {} ARP {:?} packets.", packet_count, config.arp_operation);
         thread::sleep(Duration::new(5, 0));
     }
 }
