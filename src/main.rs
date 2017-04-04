@@ -79,7 +79,6 @@ fn send_arp_packet(interface: NetworkInterface, source_ip: Ipv4Addr, source_mac:
     tx.send_to(&ethernet_packet.to_immutable(), Some(interface));
 }
 
-
 fn main() {
     let config: Config = cli_main();
     let mut packet_count: i32 = 0;
@@ -91,7 +90,7 @@ fn main() {
         let interfaces_name_match = |iface: &NetworkInterface| iface.name == config.interface;
         let interface = interfaces.into_iter().filter(interfaces_name_match).next().unwrap();
        
-       send_arp_packet(interface, config.source_ip, config.source_mac, config.target_ip, config.target_mac, config.arp_operation);
+        send_arp_packet(interface, config.source_ip, config.source_mac, config.target_ip, config.target_mac, config.arp_operation);
 
         packet_count += 1;
         println!("Sent {} ARP {:?} packets.", packet_count, config.arp_operation);
