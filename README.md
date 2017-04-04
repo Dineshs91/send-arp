@@ -23,9 +23,15 @@ OPTIONS:
         --target-mac <target_mac>    Set the target mac address
 ```
 
-**Example:**
+### Send arp request
+
+This is the default behaviour.
 
 `send-arp -i en1 --source-ip 192.168.0.2 --source-mac ac:2e:4f:cd:cd:ae --target-ip 192.168.0.1 --target-mac ef:34:23:ff:ad:dd`
+
+### Send arp reply
+
+`send-arp -i en1 --source-ip 192.168.0.2 --source-mac ac:2e:4f:cd:cd:ae --target-ip 192.168.0.1 --target-mac ef:34:23:ff:ad:dd --reply`
 
 ### Send Gratuitous arp (Request)
 
