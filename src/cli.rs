@@ -18,6 +18,7 @@ pub fn cli_main() -> Config {
                           .about(ABOUT)
                           .arg(Arg::with_name("interface")
                               .short("i")
+                              .long("interface")
                               .required(true)
                               .takes_value(true)
                               .help("Provide the interface to be used to send packets"))
