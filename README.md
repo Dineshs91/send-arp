@@ -8,7 +8,7 @@ By default an arp request packet will be sent.
 
 
 USAGE:
-    send-arp [FLAGS] -i <interface> --source-ip <source_ip> --source-mac <source_mac> --target-ip <target_ip> --target-mac <target_mac>
+    send-arp [FLAGS] --interface <interface> --source-ip <source_ip> --source-mac <source_mac> --target-ip <target_ip> --target-mac <target_mac>
 
 FLAGS:
         --reply      Send an arp reply packet
@@ -16,7 +16,7 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -i <interface>                   Provide the interface to be used to send packets
+    -i, --interface <interface>      Provide the interface to be used to send packets
         --source-ip <source_ip>      Set the source ip
         --source-mac <source_mac>    Set the source mac address
         --target-ip <target_ip>      Set the target ip
