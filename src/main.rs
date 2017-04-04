@@ -15,7 +15,7 @@ use pnet::packet::arp::MutableArpPacket;
 use pnet::util::MacAddr;
 use pnet::packet::ethernet::EtherTypes;
 use pnet::packet::MutablePacket;
-use pnet::packet::arp::{ArpHardwareTypes, ArpOperation};
+use pnet::packet::arp::{ArpHardwareTypes, ArpOperations, ArpOperation};
 
 use config::Config;
 use cli::cli_main;
@@ -93,7 +93,12 @@ fn main() {
         send_arp_packet(interface, config.source_ip, config.source_mac, config.target_ip, config.target_mac, config.arp_operation);
 
         packet_count += 1;
-        println!("Sent {} ARP {:?} packets.", packet_count, config.arp_operation);
+        let arp_operation = match config.arp_operation {
+            ArpOperations::Request => "Request",
+            ArpOperations::Reply => "Reply",
+            ArpOperation(_) => panic!("Unknown operation")
+        };
+        println!("Sent {} ARP {} packets.", packet_count, arp_operation);
         thread::sleep(Duration::new(5, 0));
     }
 }
