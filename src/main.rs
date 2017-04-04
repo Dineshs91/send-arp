@@ -1,24 +1,24 @@
 extern crate pnet;
+extern crate clap;
 
-use std::io;
+pub mod cli;
+pub mod config;
+
 use std::thread;
 use std::time::Duration;
-use std::net::IpAddr;
 use std::net::Ipv4Addr;
-use std::net::AddrParseError;
 
 use pnet::datalink::{self, NetworkInterface};
 use pnet::datalink::Channel;
-use pnet::packet::ethernet::{EthernetPacket, MutableEthernetPacket};
+use pnet::packet::ethernet::MutableEthernetPacket;
 use pnet::packet::arp::MutableArpPacket;
-use pnet::util::{MacAddr, ParseMacAddrErr};
-use pnet::packet::ethernet::{EtherTypes, EtherType};
+use pnet::util::MacAddr;
+use pnet::packet::ethernet::EtherTypes;
 use pnet::packet::MutablePacket;
-use pnet::packet::arp::{ArpHardwareTypes, ArpOperations, ArpOperation};
-use pnet::transport::transport_channel;
-use pnet::transport::TransportProtocol::Ipv4;
-use pnet::transport::TransportChannelType::Layer4;
-use pnet::packet::ip::IpNextHeaderProtocols;
+use pnet::packet::arp::{ArpHardwareTypes, ArpOperations};
+
+use config::Config;
+use cli::cli_main;
 
 
 fn send_arp_reply_packet(gateway: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4Addr, target_mac: MacAddr) {
@@ -28,7 +28,7 @@ fn send_arp_reply_packet(gateway: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4
     let interfaces_name_match = |iface: &NetworkInterface| iface.name == "en1";
     let interface = interfaces.into_iter().filter(interfaces_name_match).next().unwrap();
 
-    let(mut tx, mut rx) = match datalink::channel(&interface, Default::default()) {
+    let(mut tx, _) = match datalink::channel(&interface, Default::default()) {
         Ok(Channel::Ethernet(tx, rx)) => (tx, rx),
         Ok(_) => panic!("Unknown channel type"),
         Err(e) => panic!("Error happened {}", e),
@@ -87,36 +87,15 @@ fn send_arp_reply_packet(gateway: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4
 
 
 fn main() {
-    // let mut mac_addr = String::new();
-    // io::stdin().read_line(&mut mac_addr).expect("Failed to read input");
+    let config: Config = cli_main();
+    let mut packet_count: i32 = 0;
 
-    // let mac_addr: Result<MacAddr, ParseMacAddrErr> = mac_addr.trim().parse();
-    // println!("Mac address is {:?}", mac_addr);
+    loop {        
+        send_arp_reply_packet(config.source_ip, config.source_mac, config.target_ip, config.target_mac);
+        thread::sleep(Duration::new(5, 0));
 
-    // let mut ip_addr = String::new();
-    // io::stdin().read_line(&mut ip_addr).expect("Failed to read input");
+        packet_count += 1;
 
-    // let ip_addr: Result<Ipv4Addr, AddrParseError> = ip_addr.trim().parse();
-    // println!("Ip address is {:?}", ip_addr);
-
-    // Get the following
-    //   1. src - gateway_ip (gateway)
-    //   2. hwsrc - my_mac  (source-mac)
-    //   3. dst - target_ip  (target-ip)
-    //   4. hwdst - target_mac  (target-mac)
-    //
-    // Ethernet
-    //   1. src - my_mac
-    //   2. dst - target_mac
-
-    loop {
-        let gateway: Result<Ipv4Addr, AddrParseError> = "192.168.1.104".parse();
-        let target_ip: Result<Ipv4Addr, AddrParseError> = "192.168.1.101".parse();
-        let source_mac: Result<MacAddr, ParseMacAddrErr> = "28:CF:E9:5E:8A:7B".parse();
-        let target_mac: Result<MacAddr, ParseMacAddrErr> = "F8:CF:C5:81:C7:74".parse();
-        
-        send_arp_reply_packet(gateway.unwrap(), source_mac.unwrap(), target_ip.unwrap(), target_mac.unwrap());
-        // thread::sleep(Duration::new(5, 0));
-        break;
+        println!("Sent {} ARP reply packets.", packet_count);
     }
 }
