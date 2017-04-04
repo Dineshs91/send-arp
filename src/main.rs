@@ -21,7 +21,7 @@ use config::Config;
 use cli::cli_main;
 
 
-fn send_arp_reply_packet(gateway: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4Addr, target_mac: MacAddr) {
+fn send_arp_reply_packet(source_ip: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4Addr, target_mac: MacAddr) {
     let interfaces = datalink::interfaces();
 
     // Get en1 interface in osx.
@@ -76,7 +76,7 @@ fn send_arp_reply_packet(gateway: Ipv4Addr, source_mac: MacAddr, target_ip: Ipv4
     arp_packet.set_proto_addr_len(4);
     arp_packet.set_operation(ArpOperations::Reply);
     arp_packet.set_sender_hw_addr(source_mac);
-    arp_packet.set_sender_proto_addr(gateway);
+    arp_packet.set_sender_proto_addr(source_ip);
     arp_packet.set_target_hw_addr(target_mac);
     arp_packet.set_target_proto_addr(target_ip);
 
