@@ -39,3 +39,7 @@ This is the default behaviour.
 - Target mac is the broadcast mac address (`ff:ff:ff:ff:ff:ff`)
 
 `send-arp -i en1 --source-ip 192.168.0.2 --source-mac ac:2e:4f:cd:cd:ae --target-ip 192.168.0.2 --target-mac ff:ff:ff:ff:ff:ff`
+
+### Blog post
+
+http://blog.dineshs91.com/post/send_arp/
