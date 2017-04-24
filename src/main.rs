@@ -48,15 +48,14 @@ fn send_arp_packet(interface: NetworkInterface, source_ip: Ipv4Addr, source_mac:
     ///     payload: [],
     /// }
 
-    let mut ethernet_buffer: Vec<u8> = (0..42).map(|_| 0x00).collect::<Vec<u8>>();
-
+    let mut ethernet_buffer = [0u8; 42];
     let mut ethernet_packet = MutableEthernetPacket::new(&mut ethernet_buffer).unwrap();
+
     ethernet_packet.set_destination(target_mac);
     ethernet_packet.set_source(source_mac);
     ethernet_packet.set_ethertype(EtherTypes::Arp);
 
-    let mut arp_buffer: Vec<u8> = (0..28).map(|_| 0x00).collect::<Vec<u8>>();
-
+    let mut arp_buffer = [0u8; 28];
     let mut arp_packet = MutableArpPacket::new(&mut arp_buffer).unwrap();
 
     arp_packet.set_hardware_type(ArpHardwareTypes::Ethernet);
@@ -81,7 +80,6 @@ fn main() {
     loop {
         let interfaces = datalink::interfaces();
 
-        // Get en1 interface in osx.
         let interfaces_name_match = |iface: &NetworkInterface| iface.name == config.interface;
         let interface = interfaces.into_iter().filter(interfaces_name_match).next().unwrap();
        
